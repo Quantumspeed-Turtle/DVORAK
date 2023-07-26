@@ -1,6 +1,7 @@
 package main;
 
 import FileHandling.FileHandler;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class GUI extends JFrame implements ActionListener, KeyListener{
+public class Frame extends JFrame implements ActionListener, KeyListener{
 
     private JButton beginButton;
     private JPanel cardPanel;
@@ -22,7 +23,7 @@ public class GUI extends JFrame implements ActionListener, KeyListener{
     private String currentExpectedWord;
 
 
-    public GUI(FileHandler displayedText) {
+    public Frame(FileHandler displayedText) {
 
         String output = displayedText.getText();
         this.outputTextWords = output.split("\\s+");
@@ -31,34 +32,20 @@ public class GUI extends JFrame implements ActionListener, KeyListener{
 
         initializeComponents();
         this.setLocationRelativeTo(null);
+        this.setSize(400, 200);
 
-        this.setMinimumSize(new Dimension(400, 200));
-        FontMetrics fontMetrics = wordLabel.getFontMetrics(wordLabel.getFont());
-        int maxLineLength = 0;
-        for (String word : outputTextWords) {
-            int wordLength = fontMetrics.stringWidth(word);
-            if (wordLength > maxLineLength) {
-                maxLineLength = wordLength;
-            }
-        }
-        int padding = 50; // Add some padding
-        int preferredSize = Math.max(maxLineLength, outputTextWords.length * fontMetrics.getHeight()) + padding;
-
-        this.setPreferredSize(new Dimension((int) Math.round(preferredSize*0.2), (int) (userInputField.getHeight()+Math.round(preferredSize)*0.08))) ;
-        this.pack(); // Pack the components to set the calculated size
-
-
-
-        this.setLocationRelativeTo(null);
+        // Start the timer when the program starts
+        //startTime = System.currentTimeMillis();
         this.setBackground(Color.BLUE);
-        this.setVisible(true);
 
     }
 
     private void initializeComponents() {
-        setTitle("DVORAK Training");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        JFrame frame = new JFrame();
+        frame.setTitle("DVORAK Training");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+        this.setVisible(true);
 
         // Create a panel with CardLayout to switch between views
         cardPanel = new JPanel(new CardLayout());
@@ -66,38 +53,30 @@ public class GUI extends JFrame implements ActionListener, KeyListener{
         // View 1: Show the "Begin Program" button
         JPanel beginPanel = new JPanel();
         beginButton = new JButton("Begin Program");
-        beginButton.addActionListener(this);
+        beginButton.addActionListener(this) ;
         beginPanel.add(beginButton);
 
+
+
         // View 2: Show the output text and input text field
-        JPanel textPanel = new JPanel();
-        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS)); // Use BoxLayout
+        JPanel textPanel = new JPanel(new BorderLayout());
         wordLabel = new JLabel(getFormattedWordLabel());
-        wordLabel.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the word horizontally
-        textPanel.add(wordLabel);
-
-        // Create a container to hold the userInputField and center it horizontally
-        JPanel userInputContainer = new JPanel();
-        userInputContainer.setLayout(new BoxLayout(userInputContainer, BoxLayout.X_AXIS));
-        userInputContainer.add(Box.createHorizontalGlue()); // Pushes the userInputField to the center
+        wordLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center the word horizontally
         userInputField = new JTextField(0);
-        userInputField.setPreferredSize(new Dimension(200, 40)); // Set the preferred size
-        userInputField.setMaximumSize(new Dimension(200, 40)); // Set the maximum size
+        frame.add(textPanel, BorderLayout.NORTH);
+
+
+        //LOGIC
         userInputField.addKeyListener(this);
-        userInputContainer.add(userInputField);
-        userInputContainer.add(Box.createHorizontalGlue()); // Pushes the userInputField to the center
 
 
-
-        textPanel.add(userInputContainer);
-
+        frame.add(userInputField, BorderLayout.CENTER);
         timeLabel = new JLabel(""); // Initialize the timeLabel
-        timeLabel.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the time label horizontally
-        textPanel.add(timeLabel); // Add the timeLabel to the textPanel
-
-        cardPanel.add(beginPanel, "beginPanel");
-        cardPanel.add(textPanel, "textPanel");
-        add(cardPanel, BorderLayout.CENTER);
+        timeLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center the time label horizontally
+        frame.add(timeLabel, BorderLayout.SOUTH); // Add the timeLabel to the textPanel
+        //cardPanel.add(beginPanel, "beginPanel");
+        //cardPanel.add(textPanel, "textPanel");
+        frame.add(cardPanel, BorderLayout.CENTER);
     }
 
     @Override
