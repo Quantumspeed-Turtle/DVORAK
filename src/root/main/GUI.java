@@ -31,7 +31,7 @@ public class GUI extends JFrame {
         this.currentExpectedWord = outputTextWords[counter];
 
         initializeComponents();
-        //centerWindowOnScreen();
+        centerWindowOnScreen();
 
         // Set the size of the JFrame manually after initializing components
         setSize(400, 200);
@@ -97,7 +97,11 @@ public class GUI extends JFrame {
                             // Calculate and display the time needed to finish
                             long endTime = System.currentTimeMillis();
                             long totalTime = endTime - startTime;
-                            timeLabel.setText("Time needed: " + totalTime /1000 + " Seconds");
+
+                            double minutes = totalTime / 1000.0 / 60.0; // Convert totalTime to minutes (in floating-point)
+                            double wpm = counter / minutes;
+
+                            timeLabel.setText("Time needed: " + totalTime /1000 + " Seconds and "+ Math.round(wpm) + " WPM " );
                         }
                     } else {
                         // Incorrect input, don't move to the next word
@@ -129,17 +133,23 @@ public class GUI extends JFrame {
     }
 
     private String getFormattedWordLabel() {
-        // Highlight the current expected word in blue
+        // Highlight the current expected word in blue, and already entered words in blue
         StringBuilder formattedText = new StringBuilder();
         for (int i = 0; i < outputTextWords.length; i++) {
-            if (i == counter) {
+            if (i < counter) {
+                // Word has been correctly entered
                 formattedText.append("<font color='blue'>").append(outputTextWords[i]).append("</font> ");
+            } else if (i == counter) {
+                // Word is the current expected word
+                formattedText.append("<font color='green'>").append(outputTextWords[i]).append("</font> ");
             } else {
+                // Word has not been entered yet
                 formattedText.append(outputTextWords[i]).append(" ");
             }
         }
         return "<html>" + formattedText.toString().trim() + "</html>";
     }
+
 
     private void centerWindowOnScreen() {
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
