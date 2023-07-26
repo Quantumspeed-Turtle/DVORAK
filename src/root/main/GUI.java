@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class GUI extends JFrame {
+public class GUI extends JFrame implements ActionListener, KeyListener{
 
     private JButton beginButton;
     private JPanel cardPanel;
@@ -30,19 +30,18 @@ public class GUI extends JFrame {
         this.currentExpectedWord = outputTextWords[counter];
 
         initializeComponents();
-        centerWindowOnScreen();
-
-        // Set the size of the JFrame manually after initializing components
-        setSize(400, 200);
+        this.setLocationRelativeTo(null);
+        this.setSize(400, 200);
 
         // Start the timer when the program starts
-        startTime = System.currentTimeMillis();
+        //startTime = System.currentTimeMillis();
+        this.setBackground(Color.BLUE);
         this.setVisible(true);
 
     }
 
     private void initializeComponents() {
-        setTitle("Word Comparison");
+        setTitle("DVORAK Training");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -52,12 +51,7 @@ public class GUI extends JFrame {
         // View 1: Show the "Begin Program" button
         JPanel beginPanel = new JPanel();
         beginButton = new JButton("Begin Program");
-        beginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showTextPanel(); // Show the output text and input text field
-            }
-        });
+        beginButton.addActionListener(this) ;
         beginPanel.add(beginButton);
 
         // View 2: Show the output text and input text field
@@ -65,62 +59,63 @@ public class GUI extends JFrame {
         wordLabel = new JLabel(getFormattedWordLabel());
         wordLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center the word horizontally
         textPanel.add(wordLabel, BorderLayout.NORTH);
-
         userInputField = new JTextField(0);
 
 
+        //LOGIC
+        userInputField.addKeyListener(this);
 
-        userInputField.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
 
-            @Override
-            public void keyPressed(KeyEvent e) {}
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    String userInput = userInputField.getText().trim();
-                    if (userInput.equals(currentExpectedWord)) {
-                        userInputField.setText(""); // Clear the text field for the next word
-
-                        // Move to the next word when the correct word is entered
-                        counter++;
-                        if (counter < outputTextWords.length) {
-                            currentExpectedWord = outputTextWords[counter]; // Update the expected word
-                            wordLabel.setText(getFormattedWordLabel());
-                        } else {
-                            userInputField.setEditable(false);
-                            userInputField.removeKeyListener(this); // Disable further input handling
-
-                            // Calculate and display the time needed to finish
-                            long endTime = System.currentTimeMillis();
-                            long totalTime = endTime - startTime;
-
-                            double minutes = totalTime / 1000.0 / 60.0; // Convert totalTime to minutes (in floating-point)
-                            double wpm = counter / minutes;
-
-                            timeLabel.setText("Time needed: " + totalTime /1000 + " Seconds and "+ Math.round(wpm) + " WPM " );
-                        }
-                    } else {
-                        // Incorrect input, don't move to the next word
-                        // You can provide feedback to the user here if needed.
-
-                    }
-                }
-            }
-        });
         textPanel.add(userInputField, BorderLayout.CENTER);
-
         timeLabel = new JLabel(""); // Initialize the timeLabel
         timeLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center the time label horizontally
         textPanel.add(timeLabel, BorderLayout.SOUTH); // Add the timeLabel to the textPanel
-
         cardPanel.add(beginPanel, "beginPanel");
         cardPanel.add(textPanel, "textPanel");
-
         add(cardPanel, BorderLayout.CENTER);
     }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(beginButton == e.getSource()) {
+            showTextPanel(); // Show the output text and input text field
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            String userInput = userInputField.getText().trim();
+            if (userInput.equals(currentExpectedWord)) {
+                userInputField.setText(""); // Clear the text field for the next word
+
+                // Move to the next word when the correct word is entered
+                counter++;
+                if (counter < outputTextWords.length) {
+                    currentExpectedWord = outputTextWords[counter]; // Update the expected word
+                    wordLabel.setText(getFormattedWordLabel());
+                } else {
+                    userInputField.setEditable(false);
+                    userInputField.removeKeyListener(this); // Disable further input handling
+
+                    // Calculate and display the time needed to finish
+                    long endTime = System.currentTimeMillis();
+                    long totalTime = endTime - startTime;
+
+                    double minutes = totalTime / 1000.0 / 60.0; // Convert totalTime to minutes (in floating-point)
+                    double wpm = counter / minutes;
+
+                    timeLabel.setText("Time needed: " + totalTime /1000 + " Seconds and "+ Math.round(wpm) + " WPM " );
+                }
+            } else {
+                // Incorrect input, don't move to the next word
+                // You can provide feedback to the user here if needed.
+                timeLabel.setText("wrong retry");
+
+            }
+        }
+    }
+
 
     private void showTextPanel() {
         CardLayout cardLayout = (CardLayout) cardPanel.getLayout();
@@ -130,6 +125,7 @@ public class GUI extends JFrame {
         userInputField.setEditable(true); // Enable user input
         userInputField.requestFocus(); // Set focus on the input field
     }
+
 
     private String getFormattedWordLabel() {
         // Highlight the current expected word in blue, and already entered words in blue
@@ -150,12 +146,11 @@ public class GUI extends JFrame {
     }
 
 
-    private void centerWindowOnScreen() {
-        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-        int x = (int) ((dimension.getWidth() - getWidth()) / 2);
-        int y = (int) ((dimension.getHeight() - getHeight()) / 2);
-        setLocation(x-200, y-100);
-    }
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    @Override
+    public void keyPressed(KeyEvent e) {}
 
 
 }
