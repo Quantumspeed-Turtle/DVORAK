@@ -1,15 +1,17 @@
 package main;
 
 import FileHandling.FileHandler;
-
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Arrays;
 
 public class GUI extends JFrame {
 
+    private JButton beginButton;
+    private JPanel cardPanel;
     private JLabel wordLabel;
     private JTextField userInputField;
     private String output;
@@ -20,6 +22,7 @@ public class GUI extends JFrame {
 
     private String currentExpectedWord;
 
+
     public GUI(FileHandler displayedText) {
 
         this.output = displayedText.getText();
@@ -28,7 +31,7 @@ public class GUI extends JFrame {
         this.currentExpectedWord = outputTextWords[counter];
 
         initializeComponents();
-        centerWindowOnScreen();
+        //centerWindowOnScreen();
 
         // Set the size of the JFrame manually after initializing components
         setSize(400, 200);
@@ -36,23 +39,37 @@ public class GUI extends JFrame {
         // Start the timer when the program starts
         startTime = System.currentTimeMillis();
         this.setVisible(true);
+
     }
 
     private void initializeComponents() {
         setTitle("Word Comparison");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new GridLayout(4, 1)); // Four rows: wordLabel, userInputField, timeLabel, and checkButton
+        setLayout(new BorderLayout());
 
-        wordLabel = new JLabel(output);
+        // Create a panel with CardLayout to switch between views
+        cardPanel = new JPanel(new CardLayout());
+
+        // View 1: Show the "Begin Program" button
+        JPanel beginPanel = new JPanel();
+        beginButton = new JButton("Begin Program");
+        beginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showTextPanel(); // Show the output text and input text field
+            }
+        });
+        beginPanel.add(beginButton);
+
+        // View 2: Show the output text and input text field
+        JPanel textPanel = new JPanel(new BorderLayout());
+        wordLabel = new JLabel(getFormattedWordLabel());
         wordLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center the word horizontally
-        add(wordLabel);
+        textPanel.add(wordLabel, BorderLayout.NORTH);
 
-        userInputField = new JTextField(20);
-        add(userInputField);
+        userInputField = new JTextField(0);
 
-        timeLabel = new JLabel("");
-        timeLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center the time label horizontally
-        add(timeLabel);
+
 
         userInputField.addKeyListener(new KeyListener() {
             @Override
@@ -85,11 +102,30 @@ public class GUI extends JFrame {
                     } else {
                         // Incorrect input, don't move to the next word
                         // You can provide feedback to the user here if needed.
+
                     }
                 }
             }
         });
+        textPanel.add(userInputField, BorderLayout.CENTER);
 
+        timeLabel = new JLabel(""); // Initialize the timeLabel
+        timeLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center the time label horizontally
+        textPanel.add(timeLabel, BorderLayout.SOUTH); // Add the timeLabel to the textPanel
+
+        cardPanel.add(beginPanel, "beginPanel");
+        cardPanel.add(textPanel, "textPanel");
+
+        add(cardPanel, BorderLayout.CENTER);
+    }
+
+    private void showTextPanel() {
+        CardLayout cardLayout = (CardLayout) cardPanel.getLayout();
+        cardLayout.show(cardPanel, "textPanel");
+        beginButton.setVisible(false); // Hide the "Begin Program" button
+        startTime = System.currentTimeMillis(); // Start the timer when the program starts
+        userInputField.setEditable(true); // Enable user input
+        userInputField.requestFocus(); // Set focus on the input field
     }
 
     private String getFormattedWordLabel() {
