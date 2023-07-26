@@ -4,97 +4,113 @@ import FileHandling.FileHandler;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.File;
+import java.util.Arrays;
 
-public class GUI extends JFrame implements ActionListener, KeyListener {
+public class GUI extends JFrame {
 
-    JButton button;
-    Timer timer;
-    JLabel label;
+    private JLabel wordLabel;
+    private JTextField userInputField;
+    private String output;
+    private String[] outputTextWords;
+    private int counter;
+    private long startTime;
+    private JLabel timeLabel;
 
-    int typed = 0;
-    int count = 0;
+    private String currentExpectedWord;
 
-    double start;
-    double end;
-    double elapsed;
+    public GUI(FileHandler displayedText) {
 
-    boolean running;
-    boolean ended;
+        this.output = displayedText.getText();
+        this.outputTextWords = output.split("\\s+");
+        this.counter = 0;
+        this.currentExpectedWord = outputTextWords[counter];
 
-    final int SCREEN_X;
-    final int SCREEN_Y;
+        initializeComponents();
+        centerWindowOnScreen();
 
-    String displayedText = "";
+        // Set the size of the JFrame manually after initializing components
+        setSize(400, 200);
 
-    String typedPass;
-    String message;
-
-    public GUI() {
-
-        this.setLayout(new BorderLayout());
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        this.SCREEN_X = 600;
-        this.SCREEN_Y = 500;
-        this.setSize(SCREEN_X, SCREEN_Y);
+        // Start the timer when the program starts
+        startTime = System.currentTimeMillis();
         this.setVisible(true);
-        this.setLocationRelativeTo(null);
+    }
 
-        button = new JButton("Begin");
-        button.setFont(new Font("Arial", Font.BOLD, 30));
-        button.setForeground(Color.BLACK);
-        button.addActionListener(this);
-        //button.setFocusable(false);
+    private void initializeComponents() {
+        setTitle("Word Comparison");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new GridLayout(4, 1)); // Four rows: wordLabel, userInputField, timeLabel, and checkButton
 
-        label = new JLabel();
-        label.setText("Press Begin");
-        label.setFont(new Font("Arial", Font.BOLD, 20));
-        label.setVisible(true);
-        label.setHorizontalAlignment(JLabel.CENTER);
-        label.setBackground(Color.WHITE);
+        wordLabel = new JLabel(output);
+        wordLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center the word horizontally
+        add(wordLabel);
 
-        this.add(button, BorderLayout.SOUTH);
-        this.add(label, BorderLayout.CENTER);
-        this.getContentPane().setBackground(Color.WHITE);
-        this.addKeyListener(this);
-        this.setFocusable(true);
-        this.setResizable(false);
-        this.setTitle("DVORAK TRAINING CAMP");
-        this.revalidate();
+        userInputField = new JTextField(20);
+        add(userInputField);
 
+        timeLabel = new JLabel("");
+        timeLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center the time label horizontally
+        add(timeLabel);
+
+        userInputField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+
+            @Override
+            public void keyPressed(KeyEvent e) {}
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    String userInput = userInputField.getText().trim();
+                    if (userInput.equals(currentExpectedWord)) {
+                        userInputField.setText(""); // Clear the text field for the next word
+
+                        // Move to the next word when the correct word is entered
+                        counter++;
+                        if (counter < outputTextWords.length) {
+                            currentExpectedWord = outputTextWords[counter]; // Update the expected word
+                            wordLabel.setText(getFormattedWordLabel());
+                        } else {
+                            userInputField.setEditable(false);
+                            userInputField.removeKeyListener(this); // Disable further input handling
+
+                            // Calculate and display the time needed to finish
+                            long endTime = System.currentTimeMillis();
+                            long totalTime = endTime - startTime;
+                            timeLabel.setText("Time needed: " + totalTime /1000 + " Seconds");
+                        }
+                    } else {
+                        // Incorrect input, don't move to the next word
+                        // You can provide feedback to the user here if needed.
+                    }
+                }
+            }
+        });
 
     }
 
+    private String getFormattedWordLabel() {
+        // Highlight the current expected word in blue
+        StringBuilder formattedText = new StringBuilder();
+        for (int i = 0; i < outputTextWords.length; i++) {
+            if (i == counter) {
+                formattedText.append("<font color='blue'>").append(outputTextWords[i]).append("</font> ");
+            } else {
+                formattedText.append(outputTextWords[i]).append(" ");
+            }
+        }
+        return "<html>" + formattedText.toString().trim() + "</html>";
+    }
 
-    @Override
-    public void paint(Graphics g) {
-
+    private void centerWindowOnScreen() {
+        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (int) ((dimension.getWidth() - getWidth()) / 2);
+        int y = (int) ((dimension.getHeight() - getHeight()) / 2);
+        setLocation(x, y);
     }
 
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-
-    }
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-
-    }
 }
