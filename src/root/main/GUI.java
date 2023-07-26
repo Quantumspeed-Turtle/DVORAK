@@ -14,8 +14,7 @@ public class GUI extends JFrame {
     private JPanel cardPanel;
     private JLabel wordLabel;
     private JTextField userInputField;
-    private String output;
-    private String[] outputTextWords;
+    private final String[] outputTextWords;
     private int counter;
     private long startTime;
     private JLabel timeLabel;
@@ -25,7 +24,7 @@ public class GUI extends JFrame {
 
     public GUI(FileHandler displayedText) {
 
-        this.output = displayedText.getText();
+        String output = displayedText.getText();
         this.outputTextWords = output.split("\\s+");
         this.counter = 0;
         this.currentExpectedWord = outputTextWords[counter];
@@ -155,7 +154,7 @@ public class GUI extends JFrame {
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (int) ((dimension.getWidth() - getWidth()) / 2);
         int y = (int) ((dimension.getHeight() - getHeight()) / 2);
-        setLocation(x, y);
+        setLocation(x-200, y-100);
     }
 
 
